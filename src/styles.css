@@ -1,0 +1,337 @@
+/* Design tokens — from the README handoff (Design Tokens section). */
+:root {
+  --bg-space: #04050A;
+  --text-primary: #F5F5F7;
+  --text-muted-50: rgba(245, 245, 247, 0.5);
+  --text-muted-60: rgba(245, 245, 247, 0.6);
+  --text-muted-62: rgba(245, 245, 247, 0.62);
+  --accent: #0A84FF;
+  --card-surface: rgba(18, 22, 36, 0.82);
+  --hairline-08: rgba(255, 255, 255, 0.08);
+  --hairline-10: rgba(255, 255, 255, 0.1);
+  --hairline-12: rgba(255, 255, 255, 0.12);
+  --hairline-16: rgba(255, 255, 255, 0.16);
+  --glass-08: rgba(255, 255, 255, 0.08);
+  --glass-10: rgba(255, 255, 255, 0.1);
+  --ease-primary: cubic-bezier(0.32, 0.72, 0, 1);
+  --font-ui: -apple-system, 'SF Pro Display', 'SF Pro Text', Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', ui-monospace, Menlo, monospace;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg-space);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+}
+
+shape-lab {
+  position: absolute;
+  inset: 0;
+}
+
+/* Frosted top gradient — eased 8-stop curve so there is no visible band edge. */
+.top-frost {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  z-index: 9;
+  pointer-events: none;
+  backdrop-filter: blur(18px) brightness(1.4) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) brightness(1.4) saturate(1.2);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.11) 0%,
+    rgba(255, 255, 255, 0.095) 12%,
+    rgba(255, 255, 255, 0.075) 25%,
+    rgba(255, 255, 255, 0.05) 40%,
+    rgba(255, 255, 255, 0.028) 58%,
+    rgba(255, 255, 255, 0.012) 76%,
+    rgba(255, 255, 255, 0.003) 90%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    rgba(0, 0, 0, 0.85) 30%,
+    rgba(0, 0, 0, 0.55) 55%,
+    rgba(0, 0, 0, 0.25) 78%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    rgba(0, 0, 0, 0.85) 30%,
+    rgba(0, 0, 0, 0.55) 55%,
+    rgba(0, 0, 0, 0.25) 78%,
+    transparent 100%
+  );
+}
+
+.site-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  z-index: 10;
+  animation: intro-fade 0.9s ease-out 0.6s both;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.brand-name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.brand-sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted-50);
+}
+
+.hover-label-track {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 15;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hover-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(16, 20, 34, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--hairline-12);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  transition: opacity 0.25s ease, scale 0.25s ease;
+  opacity: 0;
+  scale: 0.92;
+}
+
+.hover-label.is-visible {
+  opacity: 1;
+  scale: 1;
+}
+
+.hover-label-index {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted-50);
+}
+
+.hint-wrap {
+  position: absolute;
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+  animation: intro-fade 0.9s ease-out 2s both;
+}
+
+@keyframes intro-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .hint-wrap {
+    animation: none;
+  }
+}
+
+.hint-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted-50);
+  background: rgba(8, 10, 18, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline-08);
+  white-space: nowrap;
+}
+
+.card-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(24px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right))
+    calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));
+  background: rgba(4, 5, 10, 0.55);
+  backdrop-filter: blur(22px) saturate(1.3);
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
+  transition: opacity 0.45s var(--ease-primary);
+  opacity: 0;
+}
+
+.card-backdrop.is-open {
+  opacity: 1;
+}
+
+.detail-card {
+  width: min(520px, 92vw);
+  color: var(--text-primary);
+  background: var(--card-surface);
+  border: 1px solid var(--hairline-10);
+  border-radius: 24px;
+  padding: 30px 32px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  transition: transform 0.5s var(--ease-primary), opacity 0.34s ease;
+}
+
+.detail-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.index-chip {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted-50);
+  border: 1px solid var(--hairline-16);
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--glass-10);
+  color: rgba(245, 245, 247, 0.7);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-title {
+  margin: 0 0 14px;
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.chip-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted-60);
+  background: var(--glass-08);
+  border-radius: 999px;
+  padding: 5px 11px;
+}
+
+.media-placeholder {
+  aspect-ratio: 16 / 10;
+  border-radius: 16px;
+  border: 1px solid var(--hairline-08);
+  background: linear-gradient(135deg, #1B2136, #0C1020);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.media-placeholder span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: rgba(245, 245, 247, 0.35);
+}
+
+.detail-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-muted-62);
+  text-wrap: pretty;
+}
+
+.case-link {
+  display: inline-block;
+  margin-top: 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Phone-size overrides. */
+@media (max-width: 480px) {
+  .site-header {
+    padding: 14px 18px;
+  }
+  .detail-card {
+    padding: 22px 20px;
+    border-radius: 20px;
+  }
+  .detail-title {
+    font-size: 26px;
+  }
+  .hint-pill {
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    padding: 6px 11px;
+  }
+}
+
+/* Touch: bigger close-button hit target (HIG ~44px incl. surrounding space). */
+@media (pointer: coarse) {
+  .close-btn {
+    width: 40px;
+    height: 40px;
+  }
+}

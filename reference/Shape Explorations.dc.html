@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #04050A; }
+    /* phone-size overrides — !important beats the prototype's inline styles;
+       in the production app express these as normal CSS instead */
+    @media (max-width: 480px) {
+      .pc-header { padding: 14px 18px !important; }
+      .pc-nav { gap: 18px !important; }
+      .pc-card { padding: 22px 20px !important; border-radius: 20px !important; }
+      .pc-title { font-size: 26px !important; }
+      .pc-hint { font-size: 10px !important; letter-spacing: 0.05em !important; padding: 6px 11px !important; }
+    }
+    .pc-hint { white-space: nowrap; }
+    /* touch: bigger close-button hit target (HIG ~44px incl. surrounding space) */
+    @media (pointer: coarse) {
+      .pc-close { width: 40px !important; height: 40px !important; }
+    }
+  </style>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+</helmet>
+<div style="position: fixed; inset: 0; overflow: hidden; background: #04050A; color: #F5F5F7; font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', Helvetica, Arial, sans-serif;">
+
+  <x-import component-from-global-scope="shape-lab" from="./shape-lab.js" distortion="{{ distortionVal }}" cardsize="{{ cardSizeVal }}" density="{{ densityVal }}" flyspeed="{{ flySpeedVal }}" automotion="{{ autoVal }}" style="position: absolute; inset: 0;" hint-size="100%,100%"></x-import>
+
+  <div style="position: absolute; top: 0; left: 0; right: 0; height: 200px; z-index: 9; pointer-events: none; backdrop-filter: blur(18px) brightness(1.4) saturate(1.2); -webkit-backdrop-filter: blur(18px) brightness(1.4) saturate(1.2); background: linear-gradient(to bottom, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.095) 12%, rgba(255,255,255,0.075) 25%, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0.028) 58%, rgba(255,255,255,0.012) 76%, rgba(255,255,255,0.003) 90%, rgba(255,255,255,0) 100%); mask-image: linear-gradient(to bottom, black 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.25) 78%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 0%, rgba(0,0,0,0.85) 30%, rgba(0,0,0,0.55) 55%, rgba(0,0,0,0.25) 78%, transparent 100%);"></div>
+  <header class="pc-header" style="position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; z-index: 10;">
+    <div style="display: flex; align-items: baseline; gap: 12px;">
+      <span style="font-size: 16px; font-weight: 600; letter-spacing: -0.01em;">Felix</span>
+      <span style="font-size: 12px; font-weight: 400; color: rgba(245,245,247,0.5);">Motion &amp; Interaction</span>
+    </div>
+    <nav class="pc-nav" style="display: flex; gap: 26px; font-size: 13px;">
+      <a href="#" style="color: #0A84FF; text-decoration: none; font-weight: 500;">Work</a>
+      <a href="#" style="color: rgba(245,245,247,0.6); text-decoration: none;">About</a>
+      <a href="#" style="color: rgba(245,245,247,0.6); text-decoration: none;">Contact</a>
+    </nav>
+  </header>
+
+  <div ref="{{ labelRef }}" style="position: fixed; left: 0; top: 0; z-index: 15; pointer-events: none; will-change: transform;">
+    <div style="{{ hoverLabelStyle }}">
+      <span style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 10px; letter-spacing: 0.08em; color: rgba(245,245,247,0.5);">{{ hoverIndex }}</span>
+      <span>{{ hoverTitle }}</span>
+    </div>
+  </div>
+
+  <div style="position: absolute; bottom: calc(22px + env(safe-area-inset-bottom)); left: 0; right: 0; display: flex; justify-content: center; pointer-events: none; z-index: 10;">
+    <span class="pc-hint" style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: 0.08em; color: rgba(245,245,247,0.5); background: rgba(8,10,18,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08);">{{ hintText }}</span>
+  </div>
+
+  <div style="{{ overlayWrapStyle }}" onClick="{{ onBackdropClick }}">
+    <div class="pc-card" style="{{ overlayCardStyle }}" onClick="{{ stopClick }}">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
+        <span style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: 0.1em; color: rgba(245,245,247,0.5); border: 1px solid rgba(255,255,255,0.16); border-radius: 999px; padding: 5px 12px;">{{ openIndex }}</span>
+        <button class="pc-close" onClick="{{ closeOverlay }}" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: rgba(255,255,255,0.1); color: rgba(245,245,247,0.7); font-size: 15px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;">&#10005;</button>
+      </div>
+      <h2 class="pc-title" style="margin: 0 0 14px; font-size: 34px; font-weight: 600; letter-spacing: -0.02em;">{{ openTitle }}</h2>
+      <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+        <span style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(245,245,247,0.6); background: rgba(255,255,255,0.08); border-radius: 999px; padding: 5px 11px;">{{ openYear }}</span>
+        <span style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: 0.06em; color: rgba(245,245,247,0.6); background: rgba(255,255,255,0.08); border-radius: 999px; padding: 5px 11px;">{{ openKind }}</span>
+      </div>
+      <div style="aspect-ratio: 16/10; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: linear-gradient(135deg, #1B2136, #0C1020); display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+        <span style="font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 11px; letter-spacing: 0.1em; color: rgba(245,245,247,0.35);">ANIMATION PLACEHOLDER</span>
+      </div>
+      <p style="margin: 0; font-size: 14px; line-height: 1.55; color: rgba(245,245,247,0.62); text-wrap: pretty;">{{ openDesc }}</p>
+      <a href="#" style="display: inline-block; margin-top: 18px; font-size: 14px; font-weight: 500; color: #0A84FF; text-decoration: none;">View case study &#8594;</a>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{},&quot;distortion&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.3,&quot;min&quot;:0,&quot;max&quot;:0.34,&quot;step&quot;:0.005,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Lens&quot;},&quot;cardSize&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:4,&quot;min&quot;:1.1,&quot;max&quot;:4,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cards&quot;},&quot;density&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:35,&quot;min&quot;:18,&quot;max&quot;:76,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cards&quot;},&quot;flySpeed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.4,&quot;min&quot;:0.4,&quot;max&quot;:2.2,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Motion&quot;},&quot;autoMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  state = { open: null, shown: false, hover: null, shape: null };
+
+  componentDidMount() {
+    this._labelRef = React.createRef();
+    this._onOpen = (e) => {
+      this.setState({ open: e.detail, shown: false, hover: null });
+      window.dispatchEvent(new CustomEvent('sphere:flatten', { detail: { flat: true } }));
+      requestAnimationFrame(() => requestAnimationFrame(() => this.setState({ shown: true })));
+    };
+    this._onResize = () => this.state.open && this.forceUpdate();
+    window.addEventListener('resize', this._onResize);
+    window.addEventListener('sphere:open', this._onOpen);
+    this._onHover = (e) => {
+      if (!this.state.open) this.setState({ hover: e.detail });
+    };
+    window.addEventListener('sphere:hover', this._onHover);
+    this._onMove = (e) => {
+      if (this._labelRef.current) {
+        this._labelRef.current.style.transform =
+          'translate(' + (e.clientX + 18) + 'px,' + (e.clientY + 16) + 'px)';
+      }
+    };
+    window.addEventListener('pointermove', this._onMove);
+    this._onKey = (e) => { if (e.key === 'Escape') this._close(); };
+    window.addEventListener('keydown', this._onKey);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('sphere:open', this._onOpen);
+    window.removeEventListener('sphere:hover', this._onHover);
+    window.removeEventListener('pointermove', this._onMove);
+    window.removeEventListener('keydown', this._onKey);
+    window.removeEventListener('resize', this._onResize);
+  }
+
+  _close() {
+    if (!this.state.open || this._closing) return;
+    this._closing = true;
+    // card shrinks back to the bubble's spot first, then the bubble re-forms
+    this.setState({ shown: false });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('sphere:flatten', { detail: { flat: false } }));
+      this._closing = false;
+      this.setState({ open: null });
+    }, 480);
+  }
+
+  renderVals() {
+    const open = this.state.open;
+    const hover = this.state.hover;
+    const shown = this.state.shown && !!open;
+
+    const segStyle = (on) =>
+      'appearance:none;border:none;cursor:pointer;border-radius:999px;padding:5px 14px;' +
+      'font-family:inherit;font-size:12px;font-weight:500;letter-spacing:0.01em;' +
+      'transition:background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;' +
+      (on
+        ? 'background:#FFFFFF;color:#1D1D1F;box-shadow:0 1px 4px rgba(0,0,0,0.10);'
+        : 'background:transparent;color:rgba(29,29,31,0.5);');
+
+    return {
+      distortionVal: String(this.props.distortion ?? 0.17),
+      cardSizeVal: String(this.props.cardSize ?? 1.75),
+      densityVal: String(this.props.density ?? 52),
+      flySpeedVal: String(this.props.flySpeed ?? 1),
+      autoVal: (this.props.autoMotion ?? true) ? 'on' : 'off',
+      hintText: (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+        ? 'DRAG TO MOVE \u00A0\u00B7\u00A0 PINCH TO ZOOM \u00A0\u00B7\u00A0 TAP A PLANET'
+        : 'DRAG TO MOVE \u00A0\u00B7\u00A0 SCROLL TO ZOOM \u00A0\u00B7\u00A0 CLICK A PLANET',
+      labelRef: this._labelRef,
+
+      hoverLabelStyle: 'display:flex;align-items:center;gap:9px;padding:7px 13px;border-radius:999px;' +
+        'background:rgba(16,20,34,0.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);' +
+        'border:1px solid rgba(255,255,255,0.12);box-shadow:0 6px 24px rgba(0,0,0,0.5);' +
+        'font-size:13px;font-weight:500;color:#F5F5F7;white-space:nowrap;' +
+        'transition:opacity 0.25s ease, scale 0.25s ease;' +
+        'opacity:' + (hover ? '1' : '0') + ';scale:' + (hover ? '1' : '0.92') + ';',
+      hoverIndex: hover ? ('0' + (hover.index + 1)).slice(-2) : '',
+      hoverTitle: hover ? hover.title : '',
+
+      overlayWrapStyle:
+        'position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;' +
+        'padding:calc(24px + env(safe-area-inset-top)) calc(24px + env(safe-area-inset-right)) ' +
+        'calc(24px + env(safe-area-inset-bottom)) calc(24px + env(safe-area-inset-left));' +
+        'transition:opacity 0.45s cubic-bezier(0.32,0.72,0,1);' +
+        'opacity:' + (shown ? '1' : '0') + ';' +
+        'pointer-events:' + (open ? 'auto' : 'none') + ';' +
+        'background:rgba(4,5,10,0.55);backdrop-filter:blur(22px) saturate(1.3);-webkit-backdrop-filter:blur(22px) saturate(1.3);',
+      overlayCardStyle: (() => {
+        // grow out of the burst bubble's screen position; shrink back on dismiss
+        let from = 'scale(0.965) translateY(14px)';
+        if (open && open.screen) {
+          const dx = open.screen.x - window.innerWidth / 2;
+          const dy = open.screen.y - window.innerHeight / 2;
+          from = 'translate(' + dx.toFixed(0) + 'px,' + dy.toFixed(0) + 'px) scale(0.06)';
+        }
+        return 'width:min(520px,92vw);color:#F5F5F7;background:rgba(18,22,36,0.82);' +
+          'border:1px solid rgba(255,255,255,0.1);' +
+          'border-radius:24px;padding:30px 32px;box-shadow:0 30px 80px rgba(0,0,0,0.6);' +
+          'transition:transform 0.5s cubic-bezier(0.32,0.72,0,1), opacity 0.34s ease;' +
+          'opacity:' + (shown ? '1' : '0') + ';' +
+          'transform:' + (shown ? 'translate(0,0) scale(1)' : from) + ';';
+      })(),
+
+      openIndex: open ? ('0' + (open.index + 1)).slice(-2) : '',
+      openTitle: open ? open.title : '',
+      openYear: open ? open.year : '',
+      openKind: open ? open.kind : '',
+      openDesc: open ? open.desc : '',
+      closeOverlay: () => this._close(),
+      onBackdropClick: () => this._close(),
+      stopClick: (e) => e.stopPropagation()
+    };
+  }
+}
+</script>
+</body>
+</html>
