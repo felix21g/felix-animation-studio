@@ -1,0 +1,9 @@
+{
+  // Cloudflare Workers config — static-assets-only deployment (no worker script).
+  // `npx wrangler deploy` uploads the Vite build output in ./dist.
+  "name": "felix-animation-studio",
+  "compatibility_date": "2026-07-12",
+  "assets": {
+    "directory": "./dist"
+  }
+}
