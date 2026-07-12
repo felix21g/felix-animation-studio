@@ -450,6 +450,8 @@ import * as THREE from 'three';
       this._scene.background = neb;
       this._scene.fog = new T.Fog(0x05060C, 16, FAR + 6);
       this._camera = new T.PerspectiveCamera(52, 1, 0.1, 200);
+      this._baseFov = 52;
+      this._dragZoom = 0;
       this._aspect = (this.clientWidth / this.clientHeight) || (16 / 9);
       this._baseZ = 8;
       this._camera.position.set(0, 0, this._baseZ);
@@ -894,6 +896,16 @@ import * as THREE from 'three';
       // strafe (infinite)
       this._camOff.x += this._panVel.x; this._camOff.y += this._panVel.y;
       this._panVel.x *= 0.86; this._panVel.y *= 0.86;
+
+      // drag zoom: widen the lens while the visitor moves the field (drag or
+      // pinch on any input), ease back to the base view once they let go
+      var zoomT = this._dragging && !this._paused ? 1 : 0;
+      this._dragZoom += (zoomT - this._dragZoom) * 0.09;
+      var fov = this._baseFov + this._dragZoom * 11;
+      if (Math.abs(this._camera.fov - fov) > 0.005) {
+        this._camera.fov = fov;
+        this._camera.updateProjectionMatrix();
+      }
 
       var camZ = this._baseZ - this._travel, camX = this._camOff.x, camY = this._camOff.y;
       this._camera.position.set(camX, camY, camZ);

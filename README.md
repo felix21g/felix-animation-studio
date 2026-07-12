@@ -80,7 +80,7 @@ Vanilla Three.js (r160). Registers a custom element `<shape-lab>`. Requires `win
 
 ### Interaction model (built into the engine)
 The engine tracks every active pointer in a per-`pointerId` registry, so mouse, pen, and multi-touch all coexist. Gestures derive from how many pointers are down:
-- **Drag** (one pointer) = strafe through space laterally (X/Y), with momentum.
+- **Drag** (one pointer) = strafe through space laterally (X/Y), with momentum. While any pointer is held (drag or pinch), the camera FOV eases out 52→63 (a moderate zoom-out so you see more of the field while navigating) and eases back to 52 on release.
 - **Scroll wheel / trackpad** = fly forward/backward (zoom through the field), with momentum.
 - **Pinch** (two fingers) = fly forward/backward — spread the fingers to fly forward, pinch them together to pull back. Pinch feeds the same travel-velocity variable as the wheel, so momentum, damping, and freeze-while-card-open come for free. The two-finger **centroid** delta also pans (two-finger drag), and putting a second finger down permanently cancels tap detection for that gesture.
 - **Click / tap** (press that moves < 4px mouse, < 9px touch) on an orb = burst + emit `sphere:open`. The pick raycasts fresh at the release position (`_raycastAtNdc()`), not the rAF hover state, so a clean tap that fires no move events still opens.
