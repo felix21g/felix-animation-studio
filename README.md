@@ -2,12 +2,22 @@
 
 ## Production app (implemented)
 
-The handoff below has been implemented as a **Vite + React** single-page app at the repo root:
+The handoff below has been implemented as a **Vite + React + TypeScript** single-page app at the repo root:
 
-- **Run it:** `npm install`, then `npm run dev` → http://localhost:5173. `npm run build` emits a fully static `dist/` deployable to any static host.
-- **Where things live:** the 3D engine is [src/engine/shape-lab.js](src/engine/shape-lab.js) (the reference engine with `import * as THREE from 'three'` instead of the CDN global, plus a `projects` property); the overlay is [src/App.jsx](src/App.jsx) + [src/components/](src/components/) with all styling in [src/styles.css](src/styles.css) (design tokens + real media queries, no `!important`).
-- **Edit your projects:** replace the twelve placeholders in [src/data/projects.js](src/data/projects.js) — data-only change, the field picks them up automatically.
+- **Run it:** `npm install`, then `npm run dev` → http://localhost:5173. Use `npm run typecheck` for strict TypeScript validation; `npm run build` emits a fully static `dist/` deployable to any static host.
+- **Where things live:** the typed 3D engine is [src/engine/shape-lab.ts](src/engine/shape-lab.ts) (the reference engine with `import * as THREE from 'three'` instead of the CDN global, plus a `projects` property); the typed overlay is [src/App.tsx](src/App.tsx) + [src/components/](src/components/) with all styling in [src/styles.css](src/styles.css) (design tokens + real media queries, no `!important`).
+- **Edit your projects:** replace the twelve typed placeholders in [src/data/projects.ts](src/data/projects.ts) — data-only change, the field picks them up automatically.
 - `reference/` remains the design spec and is untouched.
+
+The Three.js engine is split by responsibility:
+
+- `shape-lab.ts` — Web Component lifecycle, camera movement, input, and module coordination.
+- `bubble-field.ts` — bubble creation, recycling, spring motion, hover scaling, and raycasting.
+- `star-field.ts` — infinite wrapping starfield and twinkle rendering.
+- `fisheye-pass.ts` — barrel-distortion render pass plus pointer/screen coordinate correction.
+- `burst-particles.ts` — pooled bubble-burst particles.
+- `textures.ts` — procedural nebula, star sprite, and placeholder textures.
+- `types.ts` — shared engine state types.
 
 ---
 
@@ -54,9 +64,9 @@ Good news: the hard part — the 3D engine — is already written as **framework
 
 ---
 
-## The 3D Engine (`shape-lab.js`)
+## The 3D Engine (`shape-lab.ts`)
 
-Vanilla Three.js (r160). Registers a custom element `<shape-lab>`. Requires `window.THREE` to be loaded first (the prototype loads `three@0.160.0` from unpkg; in your app, `import * as THREE from 'three'` and assign `window.THREE = THREE` before the element upgrades, **or** refactor the file to take THREE as an ES import — see "Integration" below).
+Typed vanilla Three.js (r178). It imports Three.js as an ES module and registers the custom element `<shape-lab>` when the module loads.
 
 ### Public attributes (all optional, all numbers except automotion)
 | Attribute | Type | Default in code | Design default | Range | Meaning |
@@ -238,17 +248,17 @@ Minimal — overlay only:
 ---
 
 ## Assets
-No external image assets — everything is procedural (canvas-generated nebula, star sprite, burst sprite) or CSS. Only runtime dependency is **Three.js r160**. Fonts are system (SF). Replace the per-project **media placeholder** with real project imagery/video when data is available.
+No external image assets — everything is procedural (canvas-generated nebula, star sprite, burst sprite) or CSS. Only runtime dependency is **Three.js r178**. Fonts are system (SF). Replace the per-project **media placeholder** with real project imagery/video when data is available.
 
 ---
 
 ## Integration notes (React / Vite / Next.js)
 
-1. **Three.js:** `npm i three`. Either (a) `import * as THREE from 'three'; window.THREE = THREE;` before importing `shape-lab.js`, or (b) refactor `shape-lab.js` to `import * as THREE from 'three'` and drop the `whenThree`/`window.THREE` polling. Option (b) is cleaner for a bundled app.
+1. **Three.js:** `src/engine/shape-lab.ts` imports `three` directly and self-registers the Web Component. Import the engine once before rendering `<shape-lab>`.
 2. **The Web Component** can be used directly: register it once (the file self-registers `customElements.define('shape-lab', …)`), then render `<shape-lab distortion="0.3" cardsize="4" density="35" flyspeed="0.4" automotion="on" />`. In React, set these as attributes (strings). In Next.js, load it **client-side only** (`'use client'` + dynamic import with `ssr:false`) — it touches `window`/WebGL.
 3. **Overlay as a React component:** port the `renderVals()`/template in `Shape Explorations.dc.html` into a normal component. Subscribe to `sphere:hover`/`sphere:open` in a `useEffect`, keep `open/shown/hover` in `useState`, and dispatch `sphere:flatten` on open/close exactly as documented. Add/remove the `keydown`(Esc), `pointermove`(label follow), and `resize` listeners in the same effect.
 4. **Do not ship** `support.js` — prototype runtime only. The DC template syntax (`{{ }}`, `<x-import>`, `data-props`) is prototype-only; reference it for values/structure, don't reproduce it.
-5. **Project data:** replace the generated 12 "Coming soon" placeholders in `shape-lab.js` with your real project list and swap the card's media placeholder.
+5. **Project data:** replace the typed 12 "Coming soon" entries in `src/data/projects.ts` with your real project list and swap the card's media placeholder.
 
 ## Files
 - `reference/Shape Explorations.dc.html` — the overlay UI + interaction wiring (header, hover label, hint, detail card, open/close animation). Prototype format; read for exact styles/values.

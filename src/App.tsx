@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import ShapeLab from './components/ShapeLab.jsx';
-import Header from './components/Header.jsx';
-import HoverLabel from './components/HoverLabel.jsx';
-import HintPill from './components/HintPill.jsx';
-import DetailCard from './components/DetailCard.jsx';
-import { projects } from './data/projects.js';
+import ShapeLab from './components/ShapeLab';
+import Header from './components/Header';
+import HoverLabel from './components/HoverLabel';
+import HintPill from './components/HintPill';
+import DetailCard from './components/DetailCard';
+import { projects, type Project, type ProjectOpenDetail } from './data/projects';
 
 export default function App() {
-  const [open, setOpen] = useState(null);
+  const [open, setOpen] = useState<ProjectOpenDetail | null>(null);
   const [shown, setShown] = useState(false);
-  const [hover, setHover] = useState(null);
+  const [hover, setHover] = useState<Project | null>(null);
   const [, setResizeTick] = useState(0);
-  const openRef = useRef(null);
+  const openRef = useRef<ProjectOpenDetail | null>(null);
   const closingRef = useRef(false);
-  const closeTimer = useRef(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   openRef.current = open;
 
   const close = useCallback(() => {
@@ -21,7 +21,7 @@ export default function App() {
     closingRef.current = true;
     // card shrinks back to the bubble's spot first, then the bubble re-forms
     setShown(false);
-    clearTimeout(closeTimer.current);
+    if (closeTimer.current) clearTimeout(closeTimer.current);
     closeTimer.current = setTimeout(() => {
       window.dispatchEvent(new CustomEvent('sphere:flatten', { detail: { flat: false } }));
       closingRef.current = false;
@@ -30,17 +30,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const onOpen = (e) => {
+    const onOpen = (e: CustomEvent<ProjectOpenDetail>) => {
       setOpen(e.detail);
       setShown(false);
       setHover(null);
       window.dispatchEvent(new CustomEvent('sphere:flatten', { detail: { flat: true } }));
       requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)));
     };
-    const onHover = (e) => {
+    const onHover = (e: CustomEvent<Project | null>) => {
       if (!openRef.current) setHover(e.detail);
     };
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') close();
     };
     // the card's from-transform is pixel-based — recompute on resize while open
@@ -56,7 +56,7 @@ export default function App() {
       window.removeEventListener('sphere:hover', onHover);
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('resize', onResize);
-      clearTimeout(closeTimer.current);
+      if (closeTimer.current) clearTimeout(closeTimer.current);
     };
   }, [close]);
 
