@@ -1,5 +1,15 @@
 import { useEffect, useRef } from 'react';
-import '../engine/shape-lab.js';
+import '../engine/shape-lab';
+import type { Project } from '../data/projects';
+
+interface ShapeLabProps {
+  projects: Project[];
+  distortion?: number;
+  cardsize?: number;
+  density?: number;
+  flyspeed?: number;
+  automotion?: 'on' | 'off';
+}
 
 // Thin wrapper over the framework-agnostic <shape-lab> web component.
 // Attribute values are the design defaults from the README handoff.
@@ -10,8 +20,8 @@ export default function ShapeLab({
   density = 35,
   flyspeed = 0.4,
   automotion = 'on',
-}) {
-  const ref = useRef(null);
+}: ShapeLabProps) {
+  const ref = useRef<ShapeLabElement>(null);
 
   useEffect(() => {
     if (ref.current && projects) ref.current.projects = projects;
@@ -36,15 +46,15 @@ export default function ShapeLab({
     const HOLD = 700;
     const DURATION = 1200;
     // easeOutBack with c1=4: peaks at ~1.38x around t=0.47, settles to 1
-    const backOut = (t) => {
+    const backOut = (t: number) => {
       const c1 = 4;
       const u = t - 1;
       return 1 + (c1 + 1) * u * u * u + c1 * u * u;
     };
-    let raf;
-    let start;
+    let raf = 0;
+    let start: number | undefined;
     let surged = false;
-    const tick = (now) => {
+    const tick = (now: number) => {
       if (start === undefined) start = now;
       const t = (now - start - HOLD) / DURATION;
       if (t >= 1) {

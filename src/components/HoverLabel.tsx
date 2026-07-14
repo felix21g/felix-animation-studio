@@ -1,11 +1,16 @@
 import { useEffect, useRef } from 'react';
+import type { Project } from '../data/projects';
+
+interface HoverLabelProps {
+  hover: Project | null;
+}
 
 // Follows the cursor via a ref-driven transform so pointermove never re-renders React.
-export default function HoverLabel({ hover }) {
-  const trackRef = useRef(null);
+export default function HoverLabel({ hover }: HoverLabelProps) {
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onMove = (e) => {
+    const onMove = (e: PointerEvent) => {
       if (trackRef.current) {
         trackRef.current.style.transform =
           `translate(${e.clientX + 18}px, ${e.clientY + 16}px)`;

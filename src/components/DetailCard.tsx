@@ -1,11 +1,20 @@
+import type { MouseEventHandler } from 'react';
+import type { ProjectOpenDetail } from '../data/projects';
+
+interface DetailCardProps {
+  open: ProjectOpenDetail | null;
+  shown: boolean;
+  onClose: MouseEventHandler<HTMLElement>;
+}
+
 // Backdrop + project detail card. The card grows out of the burst bubble's
 // on-screen position (open.screen, fisheye-corrected by the engine) and
 // shrinks back into it on dismiss.
-export default function DetailCard({ open, shown, onClose }) {
+export default function DetailCard({ open, shown, onClose }: DetailCardProps) {
   const active = shown && !!open;
 
   let from = 'scale(0.965) translateY(14px)';
-  if (open && open.screen) {
+  if (open) {
     const dx = open.screen.x - window.innerWidth / 2;
     const dy = open.screen.y - window.innerHeight / 2;
     from = `translate(${dx.toFixed(0)}px, ${dy.toFixed(0)}px) scale(0.06)`;
